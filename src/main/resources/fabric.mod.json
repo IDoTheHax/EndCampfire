@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "endcampfire",
   "version": "${version}",
-  "name": "EndCampfire",
+  "name": "End Campfire",
   "description": "mod commission for The Alien King",
-  "authors": [],
+  "authors": ["IDoThehax"],
   "contact": {},
   "license": "All-Rights-Reserved",
   "icon": "assets/endcampfire/icon.png",
@@ -17,13 +17,6 @@
       "net.idothehax.endcampfire.Endcampfire"
     ]
   },
-  "mixins": [
-    "endcampfire.mixins.json",
-    {
-      "config": "endcampfire.client.mixins.json",
-      "environment": "client"
-    }
-  ],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
