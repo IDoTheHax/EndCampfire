@@ -40,7 +40,7 @@ public class Endcampfire implements ModInitializer {
     );
 
     public static final BlockEntityType<EndCampfireBlockEntity> END_CAMPFIRE_BLOCK_ENTITY =
-            create("campfire", EndCampfireBlockEntity::new, END_CAMPFIRE);
+            create("end_campfire", EndCampfireBlockEntity::new, END_CAMPFIRE);
 
     public static final Item END_CAMPFIRE_ITEM = registerItem(
             "end_campfire",
