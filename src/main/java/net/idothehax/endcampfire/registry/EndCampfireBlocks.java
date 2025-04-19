@@ -15,12 +15,12 @@ import net.minecraft.util.Identifier;
 import java.util.function.Function;
 
 public class EndCampfireBlocks {
-    public static final Block END_CAMPFIRE = register(
-            "endcampfire",
-            settings -> new EndCampfireBlock(settings),
-            Block.Settings.copy(Blocks.CAMPFIRE),
-            true
-    );
+    //public static final Block END_CAMPFIRE = register(
+    //        "endcampfire",
+    //        settings -> new EndCampfireBlock(settings),
+    //        Block.Settings.copy(Blocks.CAMPFIRE),
+    //        true
+    //);
 
     private static Block register(String name, Function<AbstractBlock.Settings, Block> blockFactory, AbstractBlock.Settings settings, boolean shouldRegisterItem) {
         RegistryKey<Block> blockKey = keyOfBlock(name);
