@@ -8,6 +8,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.CampfireBlockEntity;
+import net.minecraft.entity.CollisionEvent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCollisionHandler;
 import net.minecraft.entity.LivingEntity;
@@ -45,13 +46,12 @@ import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
+import net.minecraft.world.*;
 import net.minecraft.world.event.GameEvent;
 import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
@@ -110,19 +110,28 @@ public class EndCampfireBlock extends BlockWithEntity implements Waterloggable {
 
     @Override
     protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler) {
-        if (!world.isClient && state.get(LIT) && entity instanceof LivingEntity) {
-            LivingEntity livingEntity = (LivingEntity) entity;
-            // Apply slowness effect to simulate freezing
-            livingEntity.addStatusEffect(new StatusEffectInstance(
-                    StatusEffects.SLOWNESS,
-                    100, // Duration: 5 seconds (20 ticks per second)
-                    3,   // Amplifier: Slowness IV
-                    false,
-                    true
-            ));
-            entity.serverDamage(world.getDamageSources().campfire(), (float)this.fireDamage);
+        if (!(entity instanceof LivingEntity) || (Boolean)state.get(LIT) || entity.getBlockStateAtPos().isOf(this)) {
+            entity.slowMovement(state, new Vec3d((double)0.9F, (double)1.5F, (double)0.9F));
+            if (world.isClient) {
+                Random random = world.getRandom();
+                boolean bl = entity.lastRenderX != entity.getX() || entity.lastRenderZ != entity.getZ();
+                if (bl && random.nextBoolean()) {
+                    world.addParticleClient(ParticleTypes.SNOWFLAKE, entity.getX(), (double)(pos.getY() + 1), entity.getZ(), (double)(MathHelper.nextBetween(random, -1.0F, 1.0F) * 0.083333336F), (double)0.05F, (double)(MathHelper.nextBetween(random, -1.0F, 1.0F) * 0.083333336F));
+                }
+            }
         }
 
+        BlockPos blockPos = pos.toImmutable();
+        handler.addPreCallback(CollisionEvent.EXTINGUISH, (entityx) -> {
+            if (world instanceof ServerWorld serverWorld) {
+                if (entityx.isOnFire() && (serverWorld.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING) || entityx instanceof PlayerEntity) && entityx.canModifyAt(serverWorld, blockPos)) {
+                    world.breakBlock(blockPos, false);
+                }
+            }
+
+        });
+        handler.addEvent(CollisionEvent.FREEZE);
+        handler.addEvent(CollisionEvent.EXTINGUISH);
         super.onEntityCollision(state, world, pos, entity, handler);
     }
 
