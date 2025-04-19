@@ -1,7 +1,7 @@
 {
-  "parent": "minecraft:block/campfire",
+  "parent": "minecraft:block/template_campfire",
   "textures": {
-    "fire": "endcampfire:block/end_campfire",
-    "log": "endcampfire:block/end_campfire_log_lit"
+    "fire": "endcampfire:block/end_campfire_fire",
+    "lit_log": "endcampfire:block/end_campfire_log_lit"
   }
 }
