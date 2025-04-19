@@ -19,6 +19,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import net.minecraft.world.GameRules;
 
 import java.util.Set;
 import java.util.function.Function;
@@ -88,5 +89,7 @@ public class Endcampfire implements ModInitializer {
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register((itemGroup) -> {
             itemGroup.add(END_CAMPFIRE_ITEM);
         });
+
+        EndCampfireGameRules.init();
     }
 }
