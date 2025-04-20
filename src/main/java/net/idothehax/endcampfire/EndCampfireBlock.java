@@ -116,8 +116,8 @@ public class EndCampfireBlock extends BlockWithEntity implements Waterloggable {
         }
 
         // Client-side: Handle particles
-        if (world.isClient) {
-            if (!(entity instanceof LivingEntity) || state.get(LIT) || world.getBlockState(entity.getBlockPos()).isOf(this)) {
+        if (world.isClient && state.get(LIT)) {
+            if (!(entity instanceof LivingEntity) || world.getBlockState(entity.getBlockPos()).isOf(this)) {
                 Random random = world.getRandom();
                 boolean bl = entity.lastRenderX != entity.getX() || entity.lastRenderZ != entity.getZ();
                 if (bl && random.nextBoolean()) {
@@ -131,28 +131,31 @@ public class EndCampfireBlock extends BlockWithEntity implements Waterloggable {
         super.onEntityCollision(state, world, pos, entity, handler);
     }
     private void handleServerCollision(BlockState state, ServerWorld world, BlockPos pos, Entity entity, EntityCollisionHandler handler) {
-        // Check gamerule
-        if (!world.getGameRules().getBoolean(EndCampfireGameRules.TOGGLE_CUSTOM_BLOCK_COLLISION)) {
-            return;
-        }
-
-        // Slow movement
-        if (!(entity instanceof LivingEntity) || state.get(LIT) || world.getBlockState(entity.getBlockPos()).isOf(this)) {
-            entity.slowMovement(state, new Vec3d(0.9, 1.5, 0.9));
-        }
-
-        // Extinguish logic
-        BlockPos blockPos = pos.toImmutable();
-        handler.addPreCallback(CollisionEvent.EXTINGUISH, (entityx) -> {
-            if (world instanceof ServerWorld serverWorld) {
-                if (entityx.isOnFire() && (serverWorld.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING) || entityx instanceof PlayerEntity)
-                        && entityx.canModifyAt(serverWorld, blockPos)) {
-                    world.breakBlock(blockPos, false);
-                }
+        if (state.get(LIT)) {
+            // Check gamerule
+            if (!world.getGameRules().getBoolean(EndCampfireGameRules.TOGGLE_CUSTOM_BLOCK_COLLISION)) {
+                return;
             }
-        });
-        handler.addEvent(CollisionEvent.FREEZE);
-        handler.addEvent(CollisionEvent.EXTINGUISH);
+
+            // Slow movement
+            if (!(entity instanceof LivingEntity) || state.get(LIT) || world.getBlockState(entity.getBlockPos()).isOf(this)) {
+                entity.slowMovement(state, new Vec3d(0.9, 1.5, 0.9));
+            }
+
+            // Extinguish logic
+            BlockPos blockPos = pos.toImmutable();
+            handler.addPreCallback(CollisionEvent.EXTINGUISH, (entityx) -> {
+                if (world instanceof ServerWorld serverWorld) {
+                    if (entityx.isOnFire() && (serverWorld.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING) || entityx instanceof PlayerEntity)
+                            && entityx.canModifyAt(serverWorld, blockPos)) {
+                        world.breakBlock(blockPos, false);
+                    }
+                }
+            });
+            handler.addEvent(CollisionEvent.FREEZE);
+            handler.addEvent(CollisionEvent.EXTINGUISH);
+        }
+
     }
 
     protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
